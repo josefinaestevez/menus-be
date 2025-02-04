@@ -9,7 +9,7 @@ class Menu(models.Model):
     slug = models.SlugField()
 
     class Meta:
-        unique_together = ['restaurant', 'slug']
+        unique_together = ['restaurant', 'language', 'slug']
 
     def __str__(self):
         return self.name
