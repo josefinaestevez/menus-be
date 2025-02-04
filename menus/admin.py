@@ -2,24 +2,21 @@ from django.contrib import admin
 from .models import Menu, Category, Subcategory, Dish, Extra, DishExtra
 
 class MenuAdmin(admin.ModelAdmin):
-    list_display = ('restaurant', 'language', 'slug')
-    prepopulated_fields = {'slug': ('restaurant', 'language')}
+    list_display = ('name', 'restaurant', 'language', 'slug')
+    readonly_fields = ('slug',)
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'menu', 'slug')
-    prepopulated_fields = {'slug': ('name',)}
+    readonly_fields = ('slug',)
 
 class SubcategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'slug')
-    prepopulated_fields = {'slug': ('name',)}
 
 class DishAdmin(admin.ModelAdmin):
-    list_display = ('name', 'subcategory', 'price')
-    prepopulated_fields = {'slug': ('name',)}
+    list_display = ('name', 'category', 'subcategory', 'price')
 
 class ExtraAdmin(admin.ModelAdmin):
     list_display = ('name', 'restaurant', 'slug')
-    prepopulated_fields = {'slug': ('name',)}
 
 class DishExtraAdmin(admin.ModelAdmin):
     list_display = ('dish', 'extra', 'price')
