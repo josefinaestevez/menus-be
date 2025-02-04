@@ -15,7 +15,7 @@ class Menu(models.Model):
         return self.name
 
 class Category(models.Model):
-    menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
+    menu = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name='categories')
     slug = models.SlugField()
     name = models.CharField(max_length=200)
 
@@ -27,7 +27,7 @@ class Category(models.Model):
         return self.name
 
 class Subcategory(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subcategories')
     slug = models.SlugField()
     name = models.CharField(max_length=200)
 
@@ -39,8 +39,8 @@ class Subcategory(models.Model):
         return self.name
 
 class Dish(models.Model):
-    category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.CASCADE)
-    subcategory = models.ForeignKey(Subcategory, null=True, blank=True, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.CASCADE, related_name='dishes')
+    subcategory = models.ForeignKey(Subcategory, null=True, blank=True, on_delete=models.CASCADE, related_name='dishes')
     slug = models.SlugField()
     name = models.CharField(max_length=200)
     description = models.TextField()
