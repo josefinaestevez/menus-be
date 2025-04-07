@@ -20,6 +20,7 @@ class RestaurantInfo(models.Model):
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     opening_hours = models.CharField(max_length=255, blank=True, null=True)
+    currency = models.CharField(max_length=3, default="EUR")
 
     class Meta:
         verbose_name_plural = "Restaurants info"
