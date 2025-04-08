@@ -27,3 +27,22 @@ class RestaurantInfo(models.Model):
 
     def __str__(self):
         return f"Information for {self.restaurant.name}"
+    
+
+class SocialMedia(models.Model):
+    PLATFORM_CHOICES = [
+        ('Instagram', 'Instagram'),
+        ('Facebook', 'Facebook'),
+        ('TikTok', 'TikTok'),
+        ('Twitter', 'Twitter'),  # You can add more platforms if needed
+    ]
+
+    platform_name = models.CharField(
+        max_length=50,
+        choices=PLATFORM_CHOICES,  # Restrict the options to the predefined choices
+    )
+    username = models.CharField(max_length=255) # Store the username only
+    restaurant = models.ForeignKey(Restaurant, related_name="social_media", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.platform_name} - {self.restaurant.name}"
