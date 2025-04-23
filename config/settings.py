@@ -32,6 +32,12 @@ ALLOWED_HOSTS = [
     'menus-be.fly.dev'
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://menus-be.fly.dev'
+]
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 # Application definition
 
