@@ -1,6 +1,7 @@
 import os
 from django.db import models
 from django.utils.text import slugify
+from django.core.exceptions import ValidationError
 
 
 class Menu(models.Model):
@@ -45,12 +46,16 @@ class Subcategory(models.Model):
 def dish_photo_upload_path(instance, filename):
     ext = filename.split('.')[-1]
     new_filename = f'{instance.id}.{ext}'
-    return os.path.join('media', 'restaurants', instance.restaurant.slug, 'dishes', new_filename)
+    restaurant_slug = instance.restaurant.slug
+
+    return os.path.join('media', restaurant_slug, 'dishes', new_filename)
 
 
 class DishBase(models.Model):
-    photo = models.ImageField(upload_to=dish_photo_upload_path, null=True)
+    photo = models.ImageField(upload_to=dish_photo_upload_path, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    # This field is redundant, but it'll simplify things since we don't have a restaurant yet when creating a dish base
+    restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = "Dish"
@@ -68,6 +73,18 @@ class DishBase(models.Model):
             return first_translation.name
 
         return f"Dish #{self.id}"  # fallback
+    
+    def clean(self):
+        if self.pk:
+            for translation in self.translations.all():
+                t_restaurant = None
+                if translation.category:
+                    t_restaurant = translation.category.menu.restaurant
+                elif translation.subcategory:
+                    t_restaurant = translation.subcategory.category.menu.restaurant
+
+                if t_restaurant and t_restaurant != self.restaurant:
+                    raise ValidationError("All translations must belong to the same restaurant as the DishBase.")
     
 
 class Dish(models.Model):

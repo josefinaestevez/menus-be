@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
+from django.forms.models import BaseInlineFormSet
 from .models import Menu, Category, Subcategory, DishBase, Dish
 
 
@@ -26,11 +27,25 @@ class ExtraAdmin(admin.ModelAdmin):
     list_display = ('name', 'restaurant', 'slug')
 
 
+class DishInlineFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+
+        count = 0
+        for form in self.forms:
+            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                count += 1
+
+        if count == 0:
+            raise ValidationError("At least one Dish (language) is required.")
+        
+
 class DishInline(admin.StackedInline):
     model = Dish
     extra = 1
     fields = ('name', 'description', 'category', 'subcategory')
     show_change_link = True
+    formset = DishInlineFormSet
 
 
 class DishBaseAdminForm(forms.ModelForm):
@@ -38,13 +53,22 @@ class DishBaseAdminForm(forms.ModelForm):
         model = DishBase
         fields = '__all__'
 
-    def clean(self):
-        cleaned_data = super().clean()
-        
-        if not cleaned_data.get('dishes') or cleaned_data['dishes'].count() == 0:
-            raise ValidationError("A Dish must have at least one language created.")
-        
-        return cleaned_data
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['restaurant'].widget = forms.HiddenInput()
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+
+        obj = form.instance
+        if not obj.restaurant:
+            first_translation = obj.translations.first()
+            if first_translation:
+                if first_translation.category:
+                    obj.restaurant = first_translation.category.menu.restaurant
+                elif first_translation.subcategory:
+                    obj.restaurant = first_translation.subcategory.category.menu.restaurant
+                obj.save()
     
 
 class DishBaseAdmin(admin.ModelAdmin):
