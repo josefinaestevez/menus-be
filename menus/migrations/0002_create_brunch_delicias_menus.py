@@ -159,7 +159,7 @@ def create_menus(apps, schema_editor):
             },
             "es": {
                 "name": "Croquetas de Jamón",
-                "description": "CCremosas croquetas caseras.",
+                "description": "Cremosas croquetas caseras.",
                 "category": tapas_es
             }
         },
