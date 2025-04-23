@@ -2,9 +2,10 @@ import os
 from django.db import models
 from django.utils.text import slugify
 from django.core.exceptions import ValidationError
+from utils.mixins import SlugMixin
 
 
-class Menu(models.Model):
+class Menu(SlugMixin, models.Model):
     restaurant = models.ForeignKey('restaurants.Restaurant', on_delete=models.CASCADE)
     language = models.ForeignKey('languages.Language', on_delete=models.PROTECT)
     name = models.CharField(max_length=200, default='Menu')
@@ -17,7 +18,7 @@ class Menu(models.Model):
         return self.name
 
 
-class Category(models.Model):
+class Category(SlugMixin, models.Model):
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE, related_name='categories')
     slug = models.SlugField()
     name = models.CharField(max_length=200)
@@ -27,10 +28,10 @@ class Category(models.Model):
         unique_together = ['menu', 'slug']
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.menu.language.code})"
 
 
-class Subcategory(models.Model):
+class Subcategory(SlugMixin, models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subcategories')
     slug = models.SlugField()
     name = models.CharField(max_length=200)
@@ -40,7 +41,7 @@ class Subcategory(models.Model):
         unique_together = ['category', 'slug']
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.category.menu.language.code})"
 
 
 def dish_photo_upload_path(instance, filename):
@@ -87,7 +88,7 @@ class DishBase(models.Model):
                     raise ValidationError("All translations must belong to the same restaurant as the DishBase.")
     
 
-class Dish(models.Model):
+class Dish(SlugMixin, models.Model):
     slug = models.SlugField()
     base = models.ForeignKey(DishBase, on_delete=models.CASCADE, related_name='translations')
     category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.CASCADE, related_name='dishes')

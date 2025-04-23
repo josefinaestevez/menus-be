@@ -6,17 +6,18 @@ from .models import Menu, Category, Subcategory, DishBase, Dish
 
 
 class MenuAdmin(admin.ModelAdmin):
-    list_display = ('name', 'restaurant', 'language', 'slug')
-    readonly_fields = ('slug',)
+    list_display = ('name', 'restaurant', 'language')
+    exclude = ('slug',)
 
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'menu', 'slug')
-    readonly_fields = ('slug',)
+    exclude = ('slug',)
 
 
 class SubcategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'slug')
+    list_display = ('name', 'category')
+    exclude = ('slug',)
 
 
 class DishAdmin(admin.ModelAdmin):
@@ -24,7 +25,8 @@ class DishAdmin(admin.ModelAdmin):
 
 
 class ExtraAdmin(admin.ModelAdmin):
-    list_display = ('name', 'restaurant', 'slug')
+    list_display = ('name', 'restaurant')
+    exclude = ('slug',)
 
 
 class DishInlineFormSet(BaseInlineFormSet):
