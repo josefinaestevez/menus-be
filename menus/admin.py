@@ -74,25 +74,24 @@ class DishBaseAdminForm(forms.ModelForm):
     
 
 class DishBaseAdmin(admin.ModelAdmin):
-    list_display = ('name_in_preferred_language', 'restaurant', 'price')
+    list_display = ('name', 'category_and_menu', 'restaurant', 'price')
     inlines = [DishInline]
     form = DishBaseAdminForm
 
-    def name_in_preferred_language(self, obj):
-        ordered_translations = obj.translations.order_by('category__menu__language__code')
+    def name(self, obj):
+        dish_translation = obj.get_preferred_translation()
+        return dish_translation.name
+    
+    def category_and_menu(self, obj):
+        dish_translation = obj.get_preferred_translation()
+        if dish_translation.subcategory:
+            dish_category = f"{dish_translation.subcategory.name} / {dish_translation.subcategory.category.name}"
+            dish_menu = f"{dish_translation.subcategory.category.menu.name} ({dish_translation.subcategory.category.menu.language.code})"
+        else:
+            dish_category = dish_translation.category.name
+            dish_menu = f"{dish_translation.category.menu.name} ({dish_translation.category.menu.language.code})"
 
-        english_translation = ordered_translations.filter(
-            category__menu__language__code='en'
-        ).first()
-
-        if english_translation:
-            return english_translation.name
-
-        first_translation = ordered_translations.order_by('category__menu__language__code').first()
-        if first_translation:
-            return first_translation.name
-
-        return "No Translation Available"
+        return f"{dish_category} / {dish_menu}"
     
     def restaurant(self, obj):
         if obj.translations.first().category:

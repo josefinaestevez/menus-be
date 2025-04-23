@@ -15,7 +15,7 @@ class Menu(SlugMixin, models.Model):
         unique_together = ['restaurant', 'language', 'slug']
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.language.code})"
 
 
 class Category(SlugMixin, models.Model):
@@ -62,18 +62,28 @@ class DishBase(models.Model):
         verbose_name = "Dish"
         verbose_name_plural = "Dishes"
 
+    
+    
+    def get_preferred_translation(self):
+        dish_translation = self.translations.filter(category__menu__language__code='en').first() or \
+                           self.translations.order_by('category__menu__language__code').first()
+        return dish_translation
+    
     def __str__(self):
-        english_translation = self.translations.filter(
-            category__menu__language__code='en'
-        ).first()
-        if english_translation:
-            return english_translation.name
+        dish_translation = self.get_preferred_translation()
 
-        first_translation = self.translations.order_by('category__menu__language__code').first()
-        if first_translation:
-            return first_translation.name
+        if dish_translation is None:
+            return f"Dish #{self.id}"
+        
+        if dish_translation.subcategory:
+            dish_category = f"{dish_translation.subcategory.name} / {dish_translation.subcategory.category.name}"
+            dish_menu = f"{dish_translation.subcategory.category.menu.name} ({dish_translation.subcategory.category.menu.language.code})"
+        else:
+            dish_category = dish_translation.category.name
+            dish_menu = f"{dish_translation.category.menu.name} ({dish_translation.category.menu.language.code})"
 
-        return f"Dish #{self.id}"  # fallback
+        return f"{dish_translation.name} - {dish_category} / {dish_menu}"
+
     
     def clean(self):
         if self.pk:
