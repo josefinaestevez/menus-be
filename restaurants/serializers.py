@@ -42,7 +42,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Restaurant
-        fields = ['name', 'info', 'menu', 'slug', 'social_media']
+        fields = ['name', 'info', 'menu', 'slug', 'social_media', 'photo']
 
     def get_menu(self, obj):
         """
